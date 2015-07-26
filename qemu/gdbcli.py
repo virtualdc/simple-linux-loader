@@ -272,7 +272,7 @@ class GdbClient(object):
         done, params = self.execute("-data-evaluate-expression ${0}".format(name))
         if done != "done" or params["value"] == "void":
             raise GdbError("Can't get register value")
-        return int(params["value"]) & 0xFFFFFFFF # TODO: use real register size
+        return int(params["value"], 0) & 0xFFFFFFFF # TODO: use real register size
 
     def address_of(self, name):
         done, params = self.execute("-data-evaluate-expression &{0}".format(name))
