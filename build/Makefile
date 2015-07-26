@@ -1,7 +1,7 @@
 SRC = ..
 SRCTEST = $(SRC)/tests
-PYTHONPATH = $(SRC)/qemu:$(SRC)/bootsect
-PYTHONPATHTEST = $(PYTHONPATH):$(SRCTEST)/qemu:$(SRCTEST)/bootsect
+PYTHONPATH = $(SRC)/qemu:$(SRC)/bootsect:$(SRC)/setup
+PYTHONPATHTEST = $(PYTHONPATH):$(SRCTEST)/qemu:$(SRCTEST)/bootsect:$(SRCTEST)/setup
 
 mbr.bin: $(SRC)/bootsect/mbr.asm
 	nasm -f bin -o $@ $^
@@ -17,6 +17,9 @@ test-qemu: gdb-dummy qemu-dummy.bin
 
 test-bootsect: mbr.bin
 	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest mbr_tests
+
+test-setup:
+	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest blocklist_tests
 
 test: test-qemu test-bootsect
 
