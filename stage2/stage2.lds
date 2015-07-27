@@ -10,6 +10,7 @@ SECTIONS
         entry.o
         *(.text*)
         *(.data*)
+        *(.rodata*)
     } > ram
 }
 

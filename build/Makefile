@@ -17,13 +17,16 @@ entry.o: $(SRC)/stage2/entry.asm
 bioscall.o: $(SRC)/stage2/bioscall.asm
 	nasm -f elf32 -o $@ $^
 
+console.o: $(SRC)/stage2/console.c
+	gcc -c $(STAGE2_CFLAGS) -o $@ $^
+
 stage2.o: $(SRC)/stage2/stage2.c
 	gcc -c $(STAGE2_CFLAGS) -o $@ $^
 
 stage2.bin: stage2.elf
 	objcopy -O binary -j .out $^ $@
 
-stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o
+stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o console.o
 	ld -g -o $@ -T $^
 
 gdb-dummy: $(SRC)/tests/qemu/gdb-dummy.c
@@ -60,3 +63,4 @@ clean:
 	rm -f stage2.bin
 	rm -f stage2-test.bin
 	rm -f bioscall.o
+	rm -f console.o
