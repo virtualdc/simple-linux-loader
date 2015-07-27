@@ -1,3 +1,6 @@
+#ifndef BIOSCALL_H
+#define BIOSCALL_H
+
 #include <inttypes.h>
 
 
@@ -22,3 +25,6 @@ struct registers
     - saves result registers into regs
 */
 void bios_call(struct registers * regs, uint32_t int_id);
+
+
+#endif
