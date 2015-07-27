@@ -8,8 +8,8 @@ SECTIONS
     .out :
     {
         entry.o
-        stage2.o(.text*)
-        stage2.o(.data)
+        *(.text*)
+        *(.data*)
     } > ram
 }
 

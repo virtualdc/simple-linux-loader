@@ -82,6 +82,8 @@ GDT_FLAG_GR equ 0x08
 GDT_FLAG_SZ equ 0x04
 
 
+section .data
+
     ; GDT table for 32-bit flat mode
 
     align 16
@@ -95,7 +97,13 @@ gdt_begin:
         GDT_ACCESS_ONE | GDT_ACCESS_EXEC | GDT_ACCESS_RW, (GDT_FLAG_SZ | GDT_FLAG_GR)
     ; 0x18 - data
     GDT_ENTRY 0x00000000, 0xFFFFF, GDT_ACCESS_PRESENT | GDT_ACCESS_RING0 | \
-        GDT_ACCESS_ONE | GDT_ACCESS_RW, GDT_FLAG_GR | (GDT_FLAG_SZ | GDT_FLAG_GR)
+        GDT_ACCESS_ONE | GDT_ACCESS_RW, (GDT_FLAG_SZ | GDT_FLAG_GR)
+    ; 0x20 - real mode code segment
+    GDT_ENTRY 0x00000000, 0xFFFFF, GDT_ACCESS_PRESENT | GDT_ACCESS_RING0 | \
+        GDT_ACCESS_ONE | GDT_ACCESS_EXEC | GDT_ACCESS_RW, 0
+    ; 0x24 - real mode data segment
+    GDT_ENTRY 0x00000000, 0xFFFFF, GDT_ACCESS_PRESENT | GDT_ACCESS_RING0 | \
+        GDT_ACCESS_ONE | GDT_ACCESS_RW, 0
 gdt_end:
 
 gdt_ptr:
