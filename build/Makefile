@@ -20,13 +20,16 @@ bioscall.o: $(SRC)/stage2/bioscall.asm
 console.o: $(SRC)/stage2/console.c
 	gcc -c $(STAGE2_CFLAGS) -o $@ $^
 
+disk.o: $(SRC)/stage2/disk.c
+	gcc -c $(STAGE2_CFLAGS) -o $@ $^
+
 stage2.o: $(SRC)/stage2/stage2.c
 	gcc -c $(STAGE2_CFLAGS) -o $@ $^
 
 stage2.bin: stage2.elf
 	objcopy -O binary -j .out $^ $@
 
-stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o console.o
+stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o console.o disk.o
 	ld -g -o $@ -T $^
 
 gdb-dummy: $(SRC)/tests/qemu/gdb-dummy.c
@@ -64,3 +67,4 @@ clean:
 	rm -f stage2-test.bin
 	rm -f bioscall.o
 	rm -f console.o
+	rm -f disk.o
