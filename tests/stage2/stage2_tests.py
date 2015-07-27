@@ -31,7 +31,7 @@ class TestStage2Launch(unittest.TestCase):
         self.assertEqual(self.qemu.get_reg("eip"), self.qemu.address_of("stage2_pm"))
 
     def test_main_call(self):
-        main = self.qemu.address_of("main")
+        main = self.qemu.address_of("stage2_main")
         self.qemu.set_breakpoint(main)
         self.qemu.run()
         self.assertEqual(self.qemu.get_reg("cs"), 0x10)

@@ -1,6 +1,6 @@
 bits 16
 
-extern main
+extern stage2_main
 
 section .entry
 
@@ -46,7 +46,7 @@ bits 32
     ; pass drive number to main
     movzx edx, dl
     push edx
-    call main
+    call stage2_main
 
     ; WTF?! main() should not return control!
     jmp $+0

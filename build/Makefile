@@ -3,7 +3,7 @@ SRCTEST = $(SRC)/tests
 PYTHONPATH = $(SRC)/qemu:$(SRC)/bootsect:$(SRC)/setup
 PYTHONPATHTEST = $(PYTHONPATH):$(SRCTEST)/qemu:$(SRCTEST)/bootsect:$(SRCTEST)/setup:$(SRCTEST)/stage2
 
-STAGE2_CFLAGS = -g -O2 -fno-asynchronous-unwind-tables -fno-stack-protector -m32
+STAGE2_CFLAGS = -g -O2 -fno-asynchronous-unwind-tables -fno-stack-protector -m32 -Wall -Wextra -std=c99
 
 mbr.bin: $(SRC)/bootsect/mbr.asm
 	nasm -f bin -o $@ $^
