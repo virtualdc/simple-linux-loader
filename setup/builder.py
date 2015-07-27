@@ -2,6 +2,7 @@ from blocklist import BlockWriter
 from mbr import MBR
 from stage1 import Stage1
 from stage2 import Stage2
+import argparse
 
 
 def build_image(out, mbr = "mbr.bin", mbr_map = "mbr.map", stage1 = "stage1.bin",
@@ -28,19 +29,20 @@ def build_image(out, mbr = "mbr.bin", mbr_map = "mbr.map", stage1 = "stage1.bin"
 
         # put kernel to image
         if kernel:
-            with open(kernel, "r") as f:
-                kernel_raw = f.read()
+            with open(kernel, "r") as g:
+                kernel_raw = g.read()
             kernel_lba = bw.put_data(kernel_raw)
         else:
             kernel_lba = 0xFFFFFFFFFFFFFFFF
 
         # put initrd to image
         if initrd:
-            with open(initrd, "r") as f:
-                initrd_raw = f.read()
+            with open(initrd, "r") as g:
+                initrd_raw = g.read()
             initrd_lba = bw.put_data(initrd_raw)
         else:
             initrd_lba = 0xFFFFFFFFFFFFFFFF
+
 
         # configure stage2
         s2.set_kernel_blocklist_lba(kernel_lba)
@@ -62,3 +64,20 @@ def build_image(out, mbr = "mbr.bin", mbr_map = "mbr.map", stage1 = "stage1.bin"
         # put mbr to image
         f.seek(0)
         m.save(f)
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Builds image with loader, kernel and initrd')
+    parser.add_argument('--out', type=str, required=True)
+    parser.add_argument('--mbr', type=str, required=True)
+    parser.add_argument('--mbrmap', type=str, required=True)
+    parser.add_argument('--stage1', type=str, required=True)
+    parser.add_argument('--stage2', type=str, required=True)
+    parser.add_argument('--kernel', type=str, default=None)
+    parser.add_argument('--initrd', type=str, default=None)
+    parser.add_argument('--cmdline', type=str, default="auto")
+    args = parser.parse_args()
+
+    build_image(args.out, mbr = args.mbr, mbr_map = args.mbrmap, stage1 = args.stage1,
+        stage2 = args.stage2, kernel = args.kernel, initrd = args.initrd, cmdline = args.cmdline)
