@@ -1,6 +1,7 @@
-int x = 42;
+#include <inttypes.h>
 
-void main()
+
+void main(uint32_t drive_num)
 {
-    x = 5;
+    // TODO: load linux :)
 }
