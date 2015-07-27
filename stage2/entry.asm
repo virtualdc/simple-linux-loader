@@ -4,6 +4,20 @@ extern stage2_main
 
 section .entry
 
+; = ===== stage2 header =======
+; filled by setup code
+; MUST have same layout in stage2.c and stage2.py
+
+stage2_header_begin:
+
+    conf_header_size dw stage2_header_end - stage2_header_begin
+    conf_kernel_blocklist_lba dq 0
+    conf_initrd_blocklist_lba dq 0
+    conf_command_line times 256 db 0
+
+stage2_header_end:
+
+; ===== stage2 header end =====
 
 stage2_entry:
 
@@ -43,7 +57,8 @@ bits 32
     mov ss, ax
     mov esp, ebx
 
-    ; pass drive number to main
+    ; pass drive number and config to main
+    push dword stage2_header_begin
     movzx edx, dl
     push edx
     call stage2_main

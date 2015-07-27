@@ -45,7 +45,7 @@ test-bootsect: mbr.bin stage1.bin
 	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest mbr_tests stage1_tests
 
 test-setup:
-	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest blocklist_tests
+	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest blocklist_tests stage2_conf_tests
 
 test-stage2: stage2.bin mbr.bin stage1.bin
 	PYTHONPATH=$(PYTHONPATHTEST) python2 -B -m unittest stage2_tests

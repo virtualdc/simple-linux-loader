@@ -38,5 +38,6 @@ class TestStage2Launch(unittest.TestCase):
         for sreg in ["ds", "es", "fs", "gs", "ss"]:
             self.assertEqual(self.qemu.get_reg(sreg), 0x18)
         esp = self.qemu.get_reg("esp")
-        self.assertEqual(esp, 0x1000 - 8)
+        self.assertEqual(esp, 0x1000 - 12)
         self.assertEqual(struct.unpack("<I", self.qemu.get_mem(esp+4, 4))[0], 0x80)
+        self.assertEqual(struct.unpack("<I", self.qemu.get_mem(esp+8, 4))[0], 0x1000)
