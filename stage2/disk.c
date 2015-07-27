@@ -57,3 +57,33 @@ int read_sector(uint32_t disk, uint64_t lba, void * buf)
 
     return 0;
 }
+
+
+int init_blocklist(uint32_t disk, uint64_t lba, struct blocklist * list)
+{
+    int ret = read_sector(disk, lba, &list->sectors);
+    if (ret)
+        return ret;
+
+    list->disk = disk;
+    list->offset = 0;
+}
+
+
+int get_next_sector(struct blocklist * list, uint64_t * lba)
+{
+    *lba = list->sectors[list->offset++];
+    if (*lba + 1 == 0)
+        return 0;
+
+    if (list->offset < SECTOR_SIZE / sizeof(uint64_t))
+        return 0;
+
+    int ret = read_sector(list->disk, *lba, &list->sectors);
+    if (ret)
+        return ret;
+
+    list->offset = 0;
+    *lba = list->sectors[list->offset++];
+    return 0;
+}
