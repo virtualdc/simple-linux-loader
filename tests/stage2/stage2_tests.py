@@ -13,7 +13,7 @@ class TestStage2Launch(unittest.TestCase):
         builder.build_stage2_image(testbin, stage2 = "stage2.bin")
 
         self.qemu = qemu.QemuGdbClient(["-hda", testbin])
-        self.qemu.execute("symbol-file stage2.sym")
+        self.qemu.execute("symbol-file stage2.elf")
 
     def tearDown(self):
         self.qemu.close()
