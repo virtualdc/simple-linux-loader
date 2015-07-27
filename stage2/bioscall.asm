@@ -107,7 +107,7 @@ bits 16
     ; go to the interrupt handler
     retf
 
-.return_from_int
+.return_from_int:
 
     ; disable interrupts
     cli
