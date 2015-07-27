@@ -10,7 +10,7 @@ class TestStage2Launch(unittest.TestCase):
     def setUp(self):
         testbin = "stage2-test.bin"
 
-        builder.build_stage2_image(testbin, stage2 = "stage2.bin")
+        builder.build_image(testbin, stage2 = "stage2.bin")
 
         self.qemu = qemu.QemuGdbClient(["-hda", testbin])
         self.qemu.execute("symbol-file stage2.elf")
