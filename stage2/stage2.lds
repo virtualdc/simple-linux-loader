@@ -7,7 +7,8 @@ SECTIONS
 {
     .out :
     {
-        entry.o
+        *(.entry)
+        *(.bioscall)
         *(.text*)
         *(.data*)
         *(.rodata*)

@@ -2,7 +2,7 @@ bits 32
 
 global bios_call:function
 
-section .text
+section .bioscall
 
 ; MUST have same layout as struct registers in bioscall.h
 struc registers
