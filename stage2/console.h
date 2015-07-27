@@ -11,6 +11,7 @@ void put_string(const char * s);
 %w - word as FFFF
 %d - dword as FFFFFFFF
 %q - qword as FFFFFFFFFFFFFFFF
+%s - null terminated string
 */
 void put_format(const char * s, ...);
 

@@ -60,6 +60,9 @@ void put_format(const char * s, ...)
             case 'q':
                 put_hex(va_arg(list, uint64_t), 16);
                 break;
+            case 's':
+                put_string(va_arg(list, char *));
+                break;
             }
         }
     }
