@@ -67,6 +67,7 @@ int init_blocklist(uint32_t disk, uint64_t lba, struct blocklist * list)
 
     list->disk = disk;
     list->offset = 0;
+    return 0;
 }
 
 
