@@ -51,3 +51,14 @@ class TestBlockWriter(unittest.TestCase):
         buf.append("\xFF" * 8)
         buf.append("\x00" * 8 * 62)
         self.assertEqual(self.stream.getvalue(), "".join(buf))
+
+    def test_two_puts(self):
+        data = "\x01" * 512
+        self.assertEqual(self.bw.put_data(data), 2)
+        self.assertEqual(self.bw.put_data(data), 4)
+        self.assertEqual(self.stream.getvalue(),
+            "\x00" * 512 +
+            "\x01" * 512 +
+            "\x01" + "\x00" * 7 + "\xFF" * 8 + "\x00" * 62 * 8 +
+            "\x01" * 512 +
+            "\x03" + "\x00" * 7 + "\xFF" * 8 + "\x00" * 62 * 8)

@@ -32,6 +32,7 @@ class BlockWriter(object):
         if size % sector_size != 0:
             data += "\x00" * (sector_size - size % sector_size)
         self.put_sector(data)
+        self.records = []
 
     def put_data(self, data):
         # pad data
