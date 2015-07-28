@@ -17,12 +17,18 @@ struct stage2_header
 #pragma pack(pop)
 
 
-struct kernel
+struct memory_range
 {
-    uint8_t * realmode_part;
-    size_t realmode_size;
-    uint8_t * protmode_part;
-    size_t protmode_size;
+    uint8_t * start;
+    size_t size;
+};
+
+
+struct kernel_info
+{
+    struct memory_range realmode;
+    struct memory_range protmode;
+    struct memory_range initrd;
 };
 
 
@@ -91,7 +97,7 @@ static int load_protmode_part(struct blocklist * list, uint8_t * ptr, size_t * s
 }
 
 
-static int load_kernel(uint32_t disk, uint64_t lba, struct kernel * out)
+static int load_kernel(uint32_t disk, uint64_t lba, struct kernel_info * out)
 {
     struct blocklist b;
     int ret = init_blocklist(disk, lba, &b);
@@ -101,24 +107,51 @@ static int load_kernel(uint32_t disk, uint64_t lba, struct kernel * out)
     /* load RM part to 64kb below low memory limit */
     uint32_t limit = get_low_memory_limit();
     put_format("low memory limit: %d\r\n", limit);
-    out->realmode_part = (uint8_t*)(limit - 0x10000);
+    out->realmode.start = (uint8_t*)(limit - 0x10000);
 
-    ret = load_realmode_part(&b, out->realmode_part, &out->realmode_size);
+    ret = load_realmode_part(&b, out->realmode.start, &out->realmode.size);
     if (ret)
         return ret;
 
     /* load PM part just above ISA memory hole at 0x1000000 */
-    out->protmode_part = (uint8_t*)(0x1000000);
+    out->protmode.start = (uint8_t*)(0x1000000);
 
-    ret = load_protmode_part(&b, out->protmode_part, &out->protmode_size);
+    ret = load_protmode_part(&b, out->protmode.start, &out->protmode.size);
     if (ret)
         return ret;
 
-    /* display some info */
-    put_format("RM loaded at %d size %d\r\n", (uint32_t)out->realmode_part, out->realmode_size);
-    put_format("PM loaded at %d size %d\r\n", (uint32_t)out->protmode_part, out->protmode_size);
 
     return 0;
+}
+
+
+static int load_initrd(uint32_t disk, uint64_t lba, struct kernel_info * info)
+{
+    struct blocklist b;
+    int ret = init_blocklist(disk, lba, &b);
+    if (ret)
+        return ret;
+
+    /* load initrd just after kernel in upper memory */
+    info->initrd.start = info->protmode.start + info->protmode.size;
+    info->initrd.size = 0;
+
+    /* load sectors */
+    uint8_t * ptr = info->initrd.start;
+    while (1)
+    {
+        uint64_t lba;
+        int ret = get_next_sector(&b, &lba);
+        if (ret)
+            return ret;
+        if (lba + 1 == 0)
+            return 0;
+        ret = read_sector(disk, lba, ptr);
+        if (ret)
+            return ret;
+        ptr += SECTOR_SIZE;
+        info->initrd.size += SECTOR_SIZE;
+    }
 }
 
 
@@ -137,13 +170,25 @@ void stage2_main(uint32_t drive_num, struct stage2_header * header)
     put_format("  initrd=%q\r\n", header->initrd_blocklist_lba);
     put_format("  cmdline=\"%s\"\r\n", header->command_line);
 
+    struct kernel_info info;
+
     /* load kernel */
-    struct kernel kernel;
-    int ret = load_kernel(drive_num, header->kernel_blocklist_lba, &kernel);
+    int ret = load_kernel(drive_num, header->kernel_blocklist_lba, &info);
     if (ret)
     {
         put_format("Can't load kernel: %d\r\n", ret);
         die();
     }
+    put_format("RM loaded at %d size %d\r\n", (uint32_t)info.realmode.start, info.realmode.size);
+    put_format("PM loaded at %d size %d\r\n", (uint32_t)info.protmode.start, info.protmode.size);
+
+    /* load initrd */
+    ret = load_initrd(drive_num, header->initrd_blocklist_lba, &info);
+    if (ret)
+    {
+        put_format("Can't load initrd: %d\r\n", ret);
+        die();
+    }
+    put_format("initrd loaded at %d size %d\r\n", (uint32_t)info.initrd.start, info.initrd.size);
 
 }
