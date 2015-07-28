@@ -1,3 +1,4 @@
+#include "console.h"
 #include "bioscall.h"
 #include <stddef.h>
 #include <stdarg.h>

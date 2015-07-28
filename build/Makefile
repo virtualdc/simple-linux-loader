@@ -30,14 +30,14 @@ entry.o: $(SRC)/stage2/entry.asm
 bioscall.o: $(SRC)/stage2/bioscall.asm
 	nasm -f elf32 -o $@ $^
 
-console.o: $(SRC)/stage2/console.c
-	gcc -c $(STAGE2_CFLAGS) -o $@ $^
+console.o: $(SRC)/stage2/console.c $(SRC)/stage2/console.h $(SRC)/stage2/bioscall.h
+	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/console.c
 
-disk.o: $(SRC)/stage2/disk.c
-	gcc -c $(STAGE2_CFLAGS) -o $@ $^
+disk.o: $(SRC)/stage2/disk.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h
+	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/disk.c
 
-stage2.o: $(SRC)/stage2/stage2.c
-	gcc -c $(STAGE2_CFLAGS) -o $@ $^
+stage2.o: $(SRC)/stage2/stage2.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h $(SRC)/stage2/console.h
+	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/stage2.c
 
 stage2.bin: stage2.elf
 	objcopy -O binary -j .out $^ $@
