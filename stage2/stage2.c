@@ -136,8 +136,9 @@ static int load_initrd(uint32_t disk, uint64_t lba, struct kernel_info * info)
     if (ret)
         return ret;
 
-    /* load initrd just after kernel in upper memory */
-    info->initrd.start = info->protmode.start + info->protmode.size;
+    /* load initrd to some high position in upper memory */
+    /* TODO: use memory map to detect this location  */
+    info->initrd.start = (uint8_t*)0x4000000;
     info->initrd.size = 0;
 
     /* load sectors */
