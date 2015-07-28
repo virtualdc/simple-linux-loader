@@ -5,18 +5,44 @@
 
 
 /* MUST have same layout as struc registers in bioscall.asm */
+#pragma pack(push, 1)
 struct registers
 {
-    uint16_t ax;
-    uint16_t bx;
-    uint16_t cx;
-    uint16_t dx;
+    union {
+        uint32_t eax;
+        struct {
+            uint16_t ax;
+            uint16_t pad1;
+        };
+    };
+    union {
+        uint32_t ebx;
+        struct {
+            uint16_t bx;
+            uint16_t pad2;
+        };
+    };
+    union {
+        uint32_t ecx;
+        struct {
+            uint16_t cx;
+            uint16_t pad3;
+        };
+    };
+    union {
+        uint32_t edx;
+        struct {
+            uint16_t dx;
+            uint16_t pad4;
+        };
+    };
     uint16_t di;
     uint16_t si;
     uint16_t ds;
     uint16_t es;
     uint16_t flags;
 };
+#pragma pack(pop)
 
 
 /*

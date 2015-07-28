@@ -7,10 +7,10 @@ section .bioscall
 
 ; MUST have same layout as struct registers in bioscall.h
 struc registers
-    .regAX resw 1
-    .regBX resw 1
-    .regCX resw 1
-    .regDX resw 1
+    .regEAX resd 1
+    .regEBX resd 1
+    .regECX resd 1
+    .regEDX resd 1
     .regDI resw 1
     .regSI resw 1
     .regDS resw 1
@@ -54,10 +54,10 @@ bios_call:
 
     ; push desired register values (will be popped later in RM)
     push word [esi + registers.regFLAGS]
-    push word [esi + registers.regAX]
-    push word [esi + registers.regBX]
-    push word [esi + registers.regCX]
-    push word [esi + registers.regDX]
+    push dword [esi + registers.regEAX]
+    push dword [esi + registers.regEBX]
+    push dword [esi + registers.regECX]
+    push dword [esi + registers.regEDX]
     push word [esi + registers.regDI]
     push word [esi + registers.regSI]
     push word [esi + registers.regDS]
@@ -96,10 +96,10 @@ bits 16
     pop ds
     pop si
     pop di
-    pop dx
-    pop cx
-    pop bx
-    pop ax
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
     popf
 
     ; enable interrupts
@@ -116,10 +116,10 @@ bits 16
     ; we just returned from interrupt handler
     ; push modified register values
     pushf
-    push ax
-    push bx
-    push cx
-    push dx
+    push eax
+    push ebx
+    push ecx
+    push edx
     push di
     push si
     push ds
@@ -150,10 +150,10 @@ bits 32
     pop word [esi + registers.regDS]
     pop word [esi + registers.regSI]
     pop word [esi + registers.regDI]
-    pop word [esi + registers.regDX]
-    pop word [esi + registers.regCX]
-    pop word [esi + registers.regBX]
-    pop word [esi + registers.regAX]
+    pop dword [esi + registers.regEDX]
+    pop dword [esi + registers.regECX]
+    pop dword [esi + registers.regEBX]
+    pop dword [esi + registers.regEAX]
     pop word [esi + registers.regFLAGS]
 
     ; restore registers
