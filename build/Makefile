@@ -36,13 +36,16 @@ console.o: $(SRC)/stage2/console.c $(SRC)/stage2/console.h $(SRC)/stage2/bioscal
 disk.o: $(SRC)/stage2/disk.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h
 	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/disk.c
 
-stage2.o: $(SRC)/stage2/stage2.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h $(SRC)/stage2/console.h
+memory.o: $(SRC)/stage2/memory.c $(SRC)/stage2/memory.h $(SRC)/stage2/bioscall.h
+	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/memory.c
+
+stage2.o: $(SRC)/stage2/stage2.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h $(SRC)/stage2/console.h $(SRC)/stage2/memory.h
 	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/stage2.c
 
 stage2.bin: stage2.elf
 	objcopy -O binary -j .out $^ $@
 
-stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o console.o disk.o
+stage2.elf: $(SRC)/stage2/stage2.lds stage2.o entry.o bioscall.o console.o disk.o memory.o
 	ld -g -o $@ -T $^
 
 gdb-dummy: $(SRC)/tests/qemu/gdb-dummy.c
@@ -84,3 +87,4 @@ clean:
 	rm -f disk.o
 	rm -f output.img
 	rm -f initrd.img
+	rm -f memory.o

@@ -3,7 +3,7 @@
 #include "bioscall.h"
 #include "console.h"
 #include "disk.h"
-
+#include "memory.h"
 
 
 
@@ -36,14 +36,6 @@ struct kernel_info
     struct memory_range protmode;
     struct memory_range initrd;
 };
-
-
-static uint32_t get_low_memory_limit()
-{
-    struct registers regs;
-    bios_call(&regs, 0x12);
-    return regs.ax * 1024;
-}
 
 
 static int load_realmode_part(struct blocklist * list, uint8_t * ptr, size_t * size)
