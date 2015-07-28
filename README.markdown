@@ -6,7 +6,7 @@ To build and run loader you need:
 
 - machine with linux (tested on ubuntu 15.04)
 - nasm (tested on 2.11.05)
-- gcc (tested on 4.9.2)
+- gcc (tested on 4.9.2, on x86_64 gcc-multilib required)
 - binutils (tested on 2.25)
 - python2 (tested on 2.7.9)
 - gdb (tested on 7.9)
