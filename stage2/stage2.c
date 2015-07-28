@@ -6,6 +6,8 @@
 #include "memory.h"
 
 
+#define PAGE_SIZE 4096
+
 
 /* MUST have same layout with entry.asm and stage2.py */
 #define COMMAND_LINE_SIZE 256
@@ -123,16 +125,83 @@ static int load_kernel(uint32_t disk, uint64_t lba, struct kernel_info * out)
 }
 
 
-static int load_initrd(uint32_t disk, uint64_t lba, struct kernel_info * info)
+uint8_t * choose_address_for_initrd(uint32_t initrd_size, uint32_t initrd_addr_max)
+{
+    uint32_t token;
+    struct memory_map_entry entry;
+
+    /* round initrd size to page boundary */
+    if (initrd_size % PAGE_SIZE != 0)
+        initrd_size = ((initrd_size / PAGE_SIZE) + 1) * PAGE_SIZE;
+
+    int ret = get_first_memory_map_entry(&token, &entry);
+    if (ret)
+        return 0;
+
+    uint32_t choosen = 0;
+
+    do
+    {
+        /* skip unusable */
+        if (entry.type != MEMORY_MAP_USABLE)
+            continue;
+
+        uint64_t start = entry.address;
+        uint64_t end = entry.address + entry.size - 1;
+
+        /* initrd must be located in upper memory */
+        if (start < 0x100000)
+            start = 0x100000;
+
+        /* but below max address, specified by kernel */
+        if (end > initrd_addr_max)
+            end = initrd_addr_max;
+
+        /* align to page size */
+        if (start % PAGE_SIZE != 0)
+            start = ((start / PAGE_SIZE) + 1) * PAGE_SIZE;
+        if (end % PAGE_SIZE != PAGE_SIZE - 1)
+            end = (end / PAGE_SIZE) * PAGE_SIZE - 1;
+
+        /* range must be valid */
+        if (start >= end)
+            continue;
+
+        /* initrd must fit into range */
+        if (initrd_size > end - start)
+            continue;
+
+        uint32_t addr = end - initrd_size + 1;
+        put_format("Candidate at %d in range %q-%q\r\n", addr, start, end);
+
+        /* choose highest region */
+        if (addr > choosen)
+            choosen = addr;
+
+    } while (get_next_memory_map_entry(&token, &entry) == 0);
+
+    return (uint8_t*)choosen;
+}
+
+
+
+static int load_initrd(uint32_t disk, uint64_t lba, uint32_t size, struct kernel_info * info)
 {
     struct blocklist b;
     int ret = init_blocklist(disk, lba, &b);
     if (ret)
         return ret;
 
+    uint32_t initrd_addr_max = *(uint32_t*)(info->realmode.start+0x22c);
+    put_format("Last initrd byte allowed by kernel: %d\r\n", initrd_addr_max);
+
     /* load initrd to some high position in upper memory */
     /* TODO: use memory map to detect this location  */
-    info->initrd.start = (uint8_t*)0x4000000;
+    info->initrd.start = choose_address_for_initrd(size, initrd_addr_max);
+    if (!info->initrd.start) {
+        put_string("Can't choose address for initrd\r\n");
+        return 1;
+    }
     info->initrd.size = 0;
 
     /* load sectors */
@@ -231,7 +300,7 @@ void stage2_main(uint32_t drive_num, struct stage2_header * header)
     put_format("PM loaded at %d size %d\r\n", (uint32_t)info.protmode.start, info.protmode.size);
 
     /* load initrd */
-    ret = load_initrd(drive_num, header->initrd_blocklist_lba, &info);
+    ret = load_initrd(drive_num, header->initrd_blocklist_lba, header->initrd_size, &info);
     if (ret)
     {
         put_format("Can't load initrd: %d\r\n", ret);
