@@ -5,14 +5,18 @@
 #include "disk.h"
 
 
+
+
 /* MUST have same layout with entry.asm and stage2.py */
+#define COMMAND_LINE_SIZE 256
+
 #pragma pack(push, 1)
 struct stage2_header
 {
     uint16_t size;
     uint64_t kernel_blocklist_lba;
     uint64_t initrd_blocklist_lba;
-    char command_line[256];
+    char command_line[COMMAND_LINE_SIZE];
 };
 #pragma pack(pop)
 
@@ -155,6 +159,27 @@ static int load_initrd(uint32_t disk, uint64_t lba, struct kernel_info * info)
 }
 
 
+static int configure_kernel(struct kernel_info * info, const char * cmd)
+{
+    uint8_t * p = info->realmode.start;
+
+    uint8_t * cmdline = info->realmode.start + 0x10000 - COMMAND_LINE_SIZE;
+    for (size_t i = 0; i < COMMAND_LINE_SIZE; ++i)
+        cmdline[i] = cmd[i];
+
+    *(uint16_t*)(p+0x1FA) = 0x303; // vid_mode = 800x600 256
+    p[0x210] = 0xFF; // loader_type = unknown loader
+    p[0x211] = 0x81; // loadflags = can use heap | loaded high
+    *(uint32_t*)(p+0x214) = (uintptr_t)info->protmode.start; // code32_start
+    *(uint32_t*)(p+0x218) = (uintptr_t)info->initrd.start; // initrd
+    *(uint32_t*)(p+0x21C) = info->initrd.size;
+    *(uint16_t*)(p+0x224) = 0x10000 - 0x200 - COMMAND_LINE_SIZE; // heap_end_ptr
+    *(uint32_t*)(p+0x228) = (uintptr_t)cmdline; // cmd_line_ptr
+
+    return 0;
+}
+
+
 static void die()
 {
     while (1);
@@ -191,4 +216,16 @@ void stage2_main(uint32_t drive_num, struct stage2_header * header)
     }
     put_format("initrd loaded at %d size %d\r\n", (uint32_t)info.initrd.start, info.initrd.size);
 
+    /* configure kernel */
+    ret = configure_kernel(&info, header->command_line);
+    if (ret)
+    {
+        put_format("Can't configure kernel: %d\r\n", ret);
+        die();
+    }
+    put_string("kernel configured\r\n");
+
+    /* pass control to kernel */
+    put_string("Passing control to the kernel...\r\n");
+    launch_kernel(info.realmode.start);
 }

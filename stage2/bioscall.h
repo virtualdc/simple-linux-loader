@@ -27,4 +27,10 @@ struct registers
 void bios_call(struct registers * regs, uint32_t int_id);
 
 
+/*
+    - switches off protected mode
+    - passes control to kernel entry point
+*/
+void launch_kernel(uint8_t * realmode_offset);
+
 #endif

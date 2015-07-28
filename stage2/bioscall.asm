@@ -1,6 +1,7 @@
 bits 32
 
 global bios_call:function
+global launch_kernel:function
 
 section .bioscall
 
@@ -170,3 +171,57 @@ bits 32
     pop ebp
 
     ret
+
+
+; void launch_kernel(uint8_t * realmode_offset);
+
+launch_kernel:
+
+    ; yes, we can use [esp] in 32-bit addressing mode :)
+    mov ebx, [esp + 4]
+
+    ; calculate segment (cx) and offset (bx) of RM part
+    mov ecx, ebx
+    and ebx, 15
+    shr ecx, 4
+
+    ; jump to 16-bit segment
+    jmp 0x20 : .switch_to_16_bit
+
+bits 16
+.switch_to_16_bit:
+
+    ; reload segment registers
+    mov ax, 0x28
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    ; disable protected mode
+    mov eax, cr0
+    and al, 0xFE
+    mov cr0, eax
+
+    ; jump to real mode
+    jmp 0x0000 : .switch_to_real
+
+.switch_to_real:
+
+    ; we are in real mode now
+    ; set all segment registers to start of kernel's RM part
+    mov ds, cx
+    mov es, cx
+    mov fs, cx
+    mov gs, cx
+    mov ss, cx
+
+    ; setup stack pointer 256 bytes below end of segment
+    mov sp, 0xFF00
+
+    ; jump to kernel's entry point (0x200 from start)
+    add cx, 0x20
+    push cx
+    push bx
+    retf
