@@ -51,15 +51,16 @@ with all ones set (0xFFFFFFFFFFFFFFFF).
 
 ### First stage
 
-First stage can be divided into two parts - pre-stage1 code in stage1/mbr.asm
-and real stage1 in stage1/stage1.asm.
+First stage can be divided into two parts - pre-stage1 code in bootsect/mbr.asm
+and real stage1 in bootsect/stage1.asm.
 
 BIOS loads MBR with both parts into memory at 0x7C00 (linear) and passes
 control. After that, pre-stage1 copies stage1 to lowest possible address
 0x0500 (linear) and passes control to it.
 
-Now stage1 can setup 2.2kb stack at 0x0700 .. 0x0FFF (linear) and start to
-load stage2 into memory at 0x1000 (linear). After loading, stage1 passws
+Now stage1 can setup 1.7kb stack at 0x0900 .. 0x0FFF (linear) and start to
+load stage2 into memory at 0x1000 (linear). During loading it uses area
+0x0700 .. 0x08FF as buffer for blocklist sectors. After loading, stage1 passes
 control to stage2 entry point.
 
 ### Second stage
@@ -74,6 +75,9 @@ Second stage is more complex. It consists of
 
 All code (excluding bioscall and entry point, of course) are running
 in 32-bit protected mode and are written in C.
+
+Stage 2 uses same stack area as stage1, but it grows to 0x0500 .. 0x0FFF
+(2.7kb) since stage1 and it's blocklist buffer are no longer required.
 
 At first step, stage2 loads first sector of kernel's real mode part and looks
 how many sectors that part occupies. Next, stage2 loads remaining sectors
