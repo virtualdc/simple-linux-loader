@@ -15,6 +15,11 @@ target_offset equ 0x0000
 
 
 start:
+    ; some BIOS'es use this jmp as boot signature
+    jmp entry
+    nop
+
+entry:
 
     ; copy payload to target area
     mov ax, target_segment
