@@ -33,7 +33,7 @@ bioscall.o: $(SRC)/stage2/bioscall.asm
 console.o: $(SRC)/stage2/console.c $(SRC)/stage2/console.h $(SRC)/stage2/bioscall.h
 	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/console.c
 
-disk.o: $(SRC)/stage2/disk.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h
+disk.o: $(SRC)/stage2/disk.c $(SRC)/stage2/disk.h $(SRC)/stage2/bioscall.h $(SRC)/stage2/memory.h
 	gcc -c $(STAGE2_CFLAGS) -o $@ $(SRC)/stage2/disk.c
 
 memory.o: $(SRC)/stage2/memory.c $(SRC)/stage2/memory.h $(SRC)/stage2/bioscall.h

@@ -1,5 +1,6 @@
 #include "disk.h"
 #include "bioscall.h"
+#include "memory.h"
 #include <stddef.h>
 
 
@@ -12,20 +13,6 @@ struct disk_address_packet
     uint16_t segment;
     uint64_t lba;
 };
-
-
-static uint16_t segment_of(void * p)
-{
-    uintptr_t ptr = (uintptr_t)p;
-    return (ptr >> 4) & 0xFFFF;
-}
-
-
-static uint16_t offset_of(void * p)
-{
-    uintptr_t ptr = (uintptr_t)p;
-    return ptr & 0x0000F;
-}
 
 
 int read_sector(uint32_t disk, uint64_t lba, void * buf)
