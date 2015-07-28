@@ -1,6 +1,12 @@
 bits 16
 org 0x0000
 
+
+blocklist_buffer_offset equ 0x200
+sector_size equ 0x200
+record_size equ 8
+
+
     ; setup DS and stack
     mov ax, cs
     mov ds, ax
@@ -17,12 +23,12 @@ read_blocklist_sector:
     ; read blocklist sector
     mov ax, ds
     mov es, ax
-    mov di, 0x0200
+    mov di, blocklist_buffer_offset
     mov dl, [drive_num]
     call read_sector
     jc error
 
-    mov si, 0x200
+    mov si, blocklist_buffer_offset
 
 read_data_sector:
 
@@ -32,7 +38,7 @@ read_data_sector:
     ; read data sector
     mov ax, [conf_stage2_seg]
     mov es, ax
-    add ax, 512 / 16
+    add ax, sector_size / 16
     mov [conf_stage2_seg], ax
     mov di, [conf_stage2_ofs]
     mov dl, [drive_num]
@@ -41,7 +47,7 @@ read_data_sector:
 
     pop si
 
-    add si, 8
+    add si, record_size
 
     ; check for end of blocklist
     mov ax, [si]
@@ -51,7 +57,7 @@ read_data_sector:
     inc ax
     jz done
 
-    cmp si, 0x03F8
+    cmp si, blocklist_buffer_offset + sector_size - record_size
     jz read_blocklist_sector
     jmp read_data_sector
 
