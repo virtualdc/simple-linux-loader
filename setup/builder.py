@@ -31,26 +31,28 @@ def build_image(out, mbr = "mbr.bin", mbr_map = "mbr.map", stage1 = "stage1.bin"
         if kernel:
             with open(kernel, "r") as g:
                 kernel_raw = g.read()
-            kernel_lba = bw.put_data(kernel_raw)
+            kernel_lba, kernel_size = bw.put_data(kernel_raw)
         else:
-            kernel_lba = 0xFFFFFFFFFFFFFFFF
+            kernel_lba, kernel_size = 0xFFFFFFFFFFFFFFFF, 0
 
         # put initrd to image
         if initrd:
             with open(initrd, "r") as g:
                 initrd_raw = g.read()
-            initrd_lba = bw.put_data(initrd_raw)
+            initrd_lba, initrd_size = bw.put_data(initrd_raw)
         else:
-            initrd_lba = 0xFFFFFFFFFFFFFFFF
+            initrd_lba, initrd_size = 0xFFFFFFFFFFFFFFFF, 0
 
 
         # configure stage2
         s2.set_kernel_blocklist_lba(kernel_lba)
         s2.set_initrd_blocklist_lba(initrd_lba)
+        s2.set_kernel_size(kernel_size)
+        s2.set_initrd_size(initrd_size)
         s2.set_command_line(cmdline)
 
         # put stage2 to image
-        s2_lba = bw.put_data(s2.get_raw())
+        s2_lba, s2_size = bw.put_data(s2.get_raw())
 
         # configure stage1
         s1.set_stage2(s2_load)

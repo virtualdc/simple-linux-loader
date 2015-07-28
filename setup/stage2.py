@@ -5,7 +5,9 @@ import struct
 conf_header_size = 0
 conf_kernel_blocklist_lba = 2
 conf_initrd_blocklist_lba = 10
-conf_command_line = 18
+conf_kernel_size = 18
+conf_initrd_size = 22
+conf_command_line = 26
 max_command_line_size = 256
 
 
@@ -35,6 +37,18 @@ class Stage2(object):
 
     def get_initrd_blocklist_lba(self):
         return self.get(conf_initrd_blocklist_lba, 8)
+
+    def set_kernel_size(self, size):
+        self.set(conf_kernel_size, size, 4)
+
+    def get_kernel_size(self):
+        return self.get(conf_kernel_size, 4)
+
+    def set_initrd_size(self, size):
+        self.set(conf_initrd_size, size, 4)
+
+    def get_initrd_size(self):
+        return self.get(conf_initrd_size, 4)
 
     def set_command_line(self, cmdline):
         if len(cmdline) >= max_command_line_size:

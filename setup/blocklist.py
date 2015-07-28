@@ -50,4 +50,4 @@ class BlockWriter(object):
         for sector in sectors:
             self.put_blocklist_record(sector)
         self.terminate_blocklist()
-        return first
+        return (first, sector_count * sector_size)

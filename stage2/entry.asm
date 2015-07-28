@@ -13,6 +13,8 @@ stage2_header_begin:
     conf_header_size dw stage2_header_end - stage2_header_begin
     conf_kernel_blocklist_lba dq 0
     conf_initrd_blocklist_lba dq 0
+    conf_kernel_size dd 0
+    conf_initrd_size dd 0
     conf_command_line times 256 db 0
 
 stage2_header_end:

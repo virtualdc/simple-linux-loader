@@ -13,7 +13,7 @@ class TestBlockWriter(unittest.TestCase):
 
     def test_padding(self):
         data = "\x01" * 511
-        self.assertEqual(self.bw.put_data(data), 2)
+        self.assertEqual(self.bw.put_data(data), (2, 512))
         self.assertEqual(self.stream.getvalue(),
             "\x00" * 512 +
             "\x01" * 511 + "\x00" +
@@ -21,7 +21,7 @@ class TestBlockWriter(unittest.TestCase):
 
     def test_no_padding(self):
         data = "\x01" * 512
-        self.assertEqual(self.bw.put_data(data), 2)
+        self.assertEqual(self.bw.put_data(data), (2, 512))
         self.assertEqual(self.stream.getvalue(),
             "\x00" * 512 +
             "\x01" * 512 +
@@ -29,7 +29,7 @@ class TestBlockWriter(unittest.TestCase):
 
     def test_63_sectors(self):
         data = "\x01" * 512 * 63
-        self.assertEqual(self.bw.put_data(data), 64)
+        self.assertEqual(self.bw.put_data(data), (64, 512*63))
         buf = []
         buf.append("\x00" * 512)
         buf.append("\x01" * 512 * 63)
@@ -40,7 +40,7 @@ class TestBlockWriter(unittest.TestCase):
 
     def test_64_sectors(self):
         data = "\x01" * 512 * 64
-        self.assertEqual(self.bw.put_data(data), 65)
+        self.assertEqual(self.bw.put_data(data), (65, 512*64))
         buf = []
         buf.append("\x00" * 512)
         buf.append("\x01" * 512 * 64)
@@ -54,8 +54,8 @@ class TestBlockWriter(unittest.TestCase):
 
     def test_two_puts(self):
         data = "\x01" * 512
-        self.assertEqual(self.bw.put_data(data), 2)
-        self.assertEqual(self.bw.put_data(data), 4)
+        self.assertEqual(self.bw.put_data(data), (2, 512))
+        self.assertEqual(self.bw.put_data(data), (4, 512))
         self.assertEqual(self.stream.getvalue(),
             "\x00" * 512 +
             "\x01" * 512 +

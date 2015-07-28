@@ -16,6 +16,8 @@ struct stage2_header
     uint16_t size;
     uint64_t kernel_blocklist_lba;
     uint64_t initrd_blocklist_lba;
+    uint32_t kernel_size;
+    uint32_t initrd_size;
     char command_line[COMMAND_LINE_SIZE];
 };
 #pragma pack(pop)
@@ -192,8 +194,8 @@ void stage2_main(uint32_t drive_num, struct stage2_header * header)
     /* show params */
     put_string("Stage2 started:\r\n");
     put_format("  drive_num=%b\r\n", drive_num);
-    put_format("  kernel=%q\r\n", header->kernel_blocklist_lba);
-    put_format("  initrd=%q\r\n", header->initrd_blocklist_lba);
+    put_format("  kernel=%q size=%d\r\n", header->kernel_blocklist_lba, header->kernel_size);
+    put_format("  initrd=%q size=%d\r\n", header->initrd_blocklist_lba, header->initrd_size);
     put_format("  cmdline=\"%s\"\r\n", header->command_line);
 
     struct kernel_info info;

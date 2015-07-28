@@ -35,7 +35,7 @@ class TestStage1Code(unittest.TestCase):
         with open(testbin, "w") as f:
             f.write("\x00" * 512)
             wr = blocklist.BlockWriter(f, 1)
-            first = wr.put_data(payload)
+            first, first_size = wr.put_data(payload)
             f.seek(0)
             self.stage1.set_stack((0x0000, 0x1000))
             self.stage1.set_stage2((0x0100, 0x0000))
