@@ -181,6 +181,26 @@ static void die()
 }
 
 
+static int show_memory_map()
+{
+    uint32_t token;
+    struct memory_map_entry entry;
+
+    put_string("Memory map:\r\n");
+
+    int ret = get_first_memory_map_entry(&token, &entry);
+    if (ret)
+        return ret;
+
+    do
+    {
+        put_format("  %q %q %d\r\n", entry.address, entry.size, entry.type);
+    } while (get_next_memory_map_entry(&token, &entry) == 0);
+
+    return 0;
+}
+
+
 void stage2_main(uint32_t drive_num, struct stage2_header * header)
 {
     /* show params */
@@ -190,10 +210,18 @@ void stage2_main(uint32_t drive_num, struct stage2_header * header)
     put_format("  initrd=%q size=%d\r\n", header->initrd_blocklist_lba, header->initrd_size);
     put_format("  cmdline=\"%s\"\r\n", header->command_line);
 
+    /* show memory map */
+    int ret = show_memory_map();
+    if (ret)
+    {
+        put_format("Can't show memory map: %d\r\n", ret);
+        die();
+    }
+
     struct kernel_info info;
 
     /* load kernel */
-    int ret = load_kernel(drive_num, header->kernel_blocklist_lba, &info);
+    ret = load_kernel(drive_num, header->kernel_blocklist_lba, &info);
     if (ret)
     {
         put_format("Can't load kernel: %d\r\n", ret);
