@@ -4,16 +4,19 @@ PYTHONPATH = $(SRC)/qemu:$(SRC)/bootsect:$(SRC)/setup
 PYTHONPATHTEST = $(PYTHONPATH):$(SRCTEST)/qemu:$(SRCTEST)/bootsect:$(SRCTEST)/setup:$(SRCTEST)/stage2
 
 KERNEL = ../image/vmlinuz
-INITRD = ../image/initrd.img
-CMDLINE = foo bar
+INITRD = ../image/initrd
+CMDLINE = 
 
 STAGE2_CFLAGS = -g -O2 -fno-asynchronous-unwind-tables -fno-stack-protector -m32 -Wall -Wextra -std=c99
 
 all: output.img
 
-output.img: $(KERNEL) $(INITRD) stage2.bin stage1.bin mbr.bin
+output.img: $(KERNEL) $(INITRD) stage2.bin stage1.bin mbr.bin initrd.img
 	PYTHONPATH=$(PYTHONPATH) python2 -B -m builder --out $@ --mbr mbr.bin --mbrmap mbr.map \
-	    --stage1 stage1.bin --stage2 stage2.bin --kernel $(KERNEL) --initrd $(INITRD) --cmdline "$(CMDLINE)"
+	    --stage1 stage1.bin --stage2 stage2.bin --kernel $(KERNEL) --initrd initrd.img --cmdline "$(CMDLINE)"
+
+initrd.img:
+	(cd $(INITRD); find . | cpio -o -H newc | gzip) > $@
 
 mbr.bin: $(SRC)/bootsect/mbr.asm
 	nasm -f bin -o $@ $^
@@ -80,3 +83,4 @@ clean:
 	rm -f console.o
 	rm -f disk.o
 	rm -f output.img
+	rm -f initrd.img
