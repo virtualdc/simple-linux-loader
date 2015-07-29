@@ -29,6 +29,7 @@ int read_sector(uint32_t disk, uint64_t lba, void * buf)
     dap.lba = lba;
 
     struct registers regs;
+    memset(&regs, 0, sizeof(regs));
     regs.ax = 0x4200;
     regs.dx = disk & 0xFF;
     regs.ds = segment_of(&dap);

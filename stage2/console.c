@@ -1,5 +1,6 @@
 #include "console.h"
 #include "bioscall.h"
+#include "memory.h"
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -7,6 +8,7 @@
 void put_char(char c)
 {
     struct registers regs;
+    memset(&regs, 0, sizeof(regs));
     regs.ax = 0x0E00 | (unsigned char)c;
     regs.bx = 0x0000;
     bios_call(&regs, 0x10);

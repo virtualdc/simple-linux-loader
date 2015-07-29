@@ -2,6 +2,7 @@
 #define MEMORY_H
 
 #include <inttypes.h>
+#include <stddef.h>
 
 
 uint32_t get_low_memory_limit();
@@ -33,6 +34,9 @@ struct memory_map_entry
 int get_first_memory_map_entry(uint32_t * token, struct memory_map_entry * entry);
 int get_next_memory_map_entry(uint32_t * token, struct memory_map_entry * entry);
 
+
+
+void * memset(void *s, int c, size_t n);
 
 
 #endif

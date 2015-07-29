@@ -5,6 +5,7 @@
 uint32_t get_low_memory_limit()
 {
     struct registers regs;
+    memset(&regs, 0, sizeof(regs));
     bios_call(&regs, 0x12);
     return regs.ax * 1024;
 }
@@ -28,6 +29,8 @@ static int get_memory_map_entry(uint32_t * token, struct memory_map_entry * entr
 {
     struct memory_map_entry buf;
     struct registers regs;
+
+    memset(&regs, 0, sizeof(regs));
 
     regs.eax = 0xE820;
     regs.ebx = *token;
@@ -65,4 +68,12 @@ int get_next_memory_map_entry(uint32_t * token, struct memory_map_entry * entry)
     if (*token == 0)
         return 1;
     return get_memory_map_entry(token, entry);
+}
+
+
+void * memset(void *s, int c, size_t n)
+{
+    for (size_t i = 0; i < n; ++i)
+        ((char*)s)[i] = c;
+    return s;
 }
